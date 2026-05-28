@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrçaPro v4.0 - Nuvem & Tempo Real</title>
+    <title>OrçaPro v4.1 - Edição e Nuvem</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -42,7 +42,6 @@
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
-        /* Alerta piscante para Follow-up pendente e Atualizações de Status */
         .pulse-alert {
             animation: pulse-border 2s infinite;
         }
@@ -248,6 +247,78 @@
         </main>
     </div>
 
+    <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-5 border-b border-slate-100 pb-3">
+                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fas fa-edit text-blue-600"></i> Editar Orçamento
+                </h2>
+                <button onclick="closeEditModal()" class="text-slate-400 hover:text-rose-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="form-edit-orcamento" class="space-y-4">
+                <input type="hidden" id="edit-id">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit-cliente" class="block text-xs font-semibold text-slate-600 mb-1">Cliente / Contratante</label>
+                        <input type="text" id="edit-cliente" required class="input-bi w-full rounded-lg p-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="edit-servico" class="block text-xs font-semibold text-slate-600 mb-1">Descrição do Serviço</label>
+                        <input type="text" id="edit-servico" required class="input-bi w-full rounded-lg p-2 text-sm">
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="edit-material" class="block text-xs font-semibold text-slate-600 mb-1">Insumos & Materiais</label>
+                    <textarea id="edit-material" rows="2" class="input-bi w-full rounded-lg p-2 text-sm"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit-data_inicio" class="block text-xs font-semibold text-slate-600 mb-1">Início Estimado</label>
+                        <input type="date" id="edit-data_inicio" required class="input-bi w-full rounded-lg p-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="edit-data_fim" class="block text-xs font-semibold text-slate-600 mb-1">Conclusão Alvo</label>
+                        <input type="date" id="edit-data_fim" required class="input-bi w-full rounded-lg p-2 text-sm">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="edit-valor" class="block text-xs font-semibold text-slate-600 mb-1">Preço (R$)</label>
+                        <input type="number" step="0.01" id="edit-valor" required class="input-bi w-full rounded-lg p-2 text-sm">
+                    </div>
+                    <div>
+                        <label for="edit-pagamento" class="block text-xs font-semibold text-slate-600 mb-1">Condição de Pagamento</label>
+                        <select id="edit-pagamento" class="input-bi w-full rounded-lg p-2 text-sm">
+                            <option value="Pix">Pix à Vista</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Boleto">Boleto Bancário</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="edit-obs" class="block text-xs font-semibold text-slate-600 mb-1">Observações</label>
+                    <textarea id="edit-obs" rows="2" class="input-bi w-full rounded-lg p-2 text-sm"></textarea>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeEditModal()" class="px-5 py-2.5 text-sm font-semibold text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">Cancelar</button>
+                    <button type="submit" id="btn-salvar-edicao" class="px-5 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div id="app-client-view" class="max-w-3xl mx-auto p-4 sm:p-8 hidden">
         <div class="bi-card p-6 sm:p-10 bg-white space-y-8">
             <div class="flex justify-between items-start border-b border-slate-200 pb-6">
@@ -320,71 +391,82 @@
         </div>
     </div>
 
-    <div id="pdf-template" style="display: none; background: white; color: #0f172a; padding: 20px 30px; font-family: 'Arial', sans-serif; font-size: 12px; line-height: 1.4;">
-        <div style="display: table; width: 100%; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; margin-bottom: 15px;">
-            <div style="display: table-cell; vertical-align: middle; width: 40%;">
-                <div style="font-size: 20px; font-weight: bold; color: #1e3a8a;">PROPOSTA</div>
-            </div>
-            <div style="display: table-cell; text-align: right; vertical-align: middle;">
-                <h1 style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 700;" id="pdf-emissor-nome">Empresa</h1>
-                <p style="margin: 2px 0; color: #475569; font-size: 11px;" id="pdf-emissor-cnpj">CNPJ:</p>
-                <p style="margin: 2px 0; color: #475569; font-size: 11px;" id="pdf-emissor-contatos">Tel: | Email:</p>
-            </div>
+    <div id="pdf-template" style="display: none; background: white; color: #0f172a; padding: 30px; font-family: 'Arial', sans-serif; font-size: 12px; line-height: 1.5; width: 800px; max-width: 100%;">
+        
+        <table style="width: 100%; border-bottom: 2px solid #cbd5e1; padding-bottom: 15px; margin-bottom: 20px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 50%; vertical-align: top;">
+                    <div style="font-size: 24px; font-weight: bold; color: #1e3a8a; letter-spacing: 1px;">PROPOSTA</div>
+                </td>
+                <td style="width: 50%; text-align: right; vertical-align: top;">
+                    <h1 style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 700;" id="pdf-emissor-nome">Empresa</h1>
+                    <p style="margin: 3px 0; color: #475569; font-size: 11px;" id="pdf-emissor-cnpj">CNPJ:</p>
+                    <p style="margin: 3px 0; color: #475569; font-size: 11px;" id="pdf-emissor-contatos">Tel: | Email:</p>
+                </td>
+            </tr>
+        </table>
+
+        <table style="width: 100%; margin-bottom: 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 12px; width: 50%; vertical-align: top;">
+                    <h4 style="margin: 0 0 5px 0; color: #1e3a8a; font-size: 11px; text-transform: uppercase; font-weight: bold;">Apresentado a</h4>
+                    <p style="margin: 0; font-size: 14px; font-weight: bold; color: #0f172a;" id="pdf-cliente-nome">Cliente</p>
+                </td>
+                <td style="padding: 12px; width: 50%; text-align: right; vertical-align: top; font-size: 12px; color: #334155;">
+                    <p style="margin: 0 0 5px 0;"><strong>Emissão:</strong> <span id="pdf-data-emissao">--</span></p>
+                    <p style="margin: 0; color: #b91c1c;"><strong>Validade:</strong> <span id="pdf-data-validade">--</span></p>
+                </td>
+            </tr>
+        </table>
+
+        <div style="margin-bottom: 20px;">
+            <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; color: #0f172a; font-size: 14px; font-weight: bold;">1. Escopo Técnico</h3>
+            <p style="margin: 0; font-size: 13px; color: #334155;" id="pdf-servico-desc">Descrição</p>
         </div>
 
-        <div style="display: table; width: 100%; margin-bottom: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
-            <div style="display: table-cell; width: 50%;">
-                <h4 style="margin: 0 0 4px 0; color: #1e3a8a; font-size: 10px; text-transform: uppercase;">Apresentado a</h4>
-                <p style="margin: 0; font-size: 13px; font-weight: bold;" id="pdf-cliente-nome">Cliente</p>
-            </div>
-            <div style="display: table-cell; width: 50%; text-align: right; font-size: 11px;">
-                <p style="margin: 2px 0;"><strong>Emissão:</strong> <span id="pdf-data-emissao">--</span></p>
-                <p style="margin: 2px 0; color: #b91c1c;"><strong>Validade:</strong> <span id="pdf-data-validade">--</span></p>
-            </div>
+        <div style="margin-bottom: 20px;">
+            <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; color: #0f172a; font-size: 14px; font-weight: bold;">2. Materiais e Recursos</h3>
+            <p style="margin: 0; font-size: 13px; color: #334155; white-space: pre-line;" id="pdf-material-desc">Materiais</p>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">1. Escopo Técnico</h3>
-            <p style="margin: 0; font-size: 12px; color: #334155;" id="pdf-servico-desc">Descrição</p>
-        </div>
+        <table style="width: 100%; margin-bottom: 20px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 48%; vertical-align: top; padding-right: 2%;">
+                    <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; color: #0f172a; font-size: 14px; font-weight: bold;">3. Prazos</h3>
+                    <p style="margin: 4px 0; font-size: 12px; color: #334155;"><strong>Início:</strong> <span id="pdf-cron-inicio">--</span></p>
+                    <p style="margin: 4px 0; font-size: 12px; color: #334155;"><strong>Conclusão:</strong> <span id="pdf-cron-fim">--</span></p>
+                </td>
+                <td style="width: 50%; vertical-align: top;">
+                    <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 5px; margin-bottom: 8px; color: #0f172a; font-size: 14px; font-weight: bold;">4. Observações</h3>
+                    <p style="margin: 0; font-size: 12px; color: #475569; white-space: pre-line;" id="pdf-obs-desc">-</p>
+                </td>
+            </tr>
+        </table>
 
-        <div style="margin-bottom: 15px;">
-            <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">2. Materiais e Recursos</h3>
-            <p style="margin: 0; font-size: 12px; color: #334155; white-space: pre-line;" id="pdf-material-desc">Materiais</p>
-        </div>
+        <table style="width: 100%; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; margin-bottom: 40px; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 15px; width: 60%; vertical-align: middle;">
+                    <p style="margin: 0; font-size: 11px; color: #475569; text-transform: uppercase; font-weight: bold;">Condição de Pagamento</p>
+                    <p style="margin: 4px 0 0 0; font-size: 14px; font-weight: bold; color: #0f172a;" id="pdf-cond-pagamento">Forma</p>
+                </td>
+                <td style="padding: 15px; width: 40%; text-align: right; vertical-align: middle;">
+                    <p style="margin: 0; font-size: 11px; text-transform: uppercase; color: #475569; font-weight: bold;">Investimento Total</p>
+                    <p style="margin: 4px 0 0 0; font-size: 22px; font-weight: bold; color: #1d4ed8;">R$ <span id="pdf-valor-total">0,00</span></p>
+                </td>
+            </tr>
+        </table>
 
-        <div style="display: table; width: 100%; margin-bottom: 15px;">
-            <div style="display: table-cell; width: 50%; padding-right: 10px;">
-                <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">3. Prazos</h3>
-                <p style="margin: 2px 0; font-size: 11px;"><strong>Início:</strong> <span id="pdf-cron-inicio">--</span></p>
-                <p style="margin: 2px 0; font-size: 11px;"><strong>Conclusão:</strong> <span id="pdf-cron-fim">--</span></p>
-            </div>
-            <div style="display: table-cell; width: 50%; padding-left: 10px;">
-                <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">4. Observações</h3>
-                <p style="margin: 0; font-size: 11px; color: #475569;" id="pdf-obs-desc">-</p>
-            </div>
-        </div>
-
-        <div style="background: #eff6ff; padding: 15px; border-radius: 6px; margin-bottom: 30px; display: table; width: 100%; border: 1px solid #bfdbfe;">
-            <div style="display: table-cell; width: 60%; vertical-align: middle;">
-                <p style="margin: 0; font-size: 11px; color: #475569; text-transform: uppercase;">Condição de Pagamento</p>
-                <p style="margin: 2px 0 0 0; font-size: 13px; font-weight: bold; color: #0f172a;" id="pdf-cond-pagamento">Forma</p>
-            </div>
-            <div style="display: table-cell; width: 40%; text-align: right; vertical-align: middle;">
-                <p style="margin: 0; font-size: 10px; text-transform: uppercase; color: #475569; font-weight: bold;">Investimento Total</p>
-                <p style="margin: 2px 0 0 0; font-size: 20px; font-weight: bold; color: #1d4ed8;">R$ <span id="pdf-valor-total">0,00</span></p>
-            </div>
-        </div>
-
-        <div style="margin-top: 40px; display: table; width: 100%;">
-            <div style="display: table-cell; width: 45%; border-top: 1px solid #94a3b8; text-align: center; padding-top: 5px;">
-                <span style="font-size: 11px; font-weight: bold;" id="pdf-assinatura-prestador">Prestador</span>
-            </div>
-            <div style="display: table-cell; width: 10%;"></div>
-            <div style="display: table-cell; width: 45%; border-top: 1px solid #94a3b8; text-align: center; padding-top: 5px;">
-                <span style="font-size: 11px; font-weight: bold;">Aceite Digital do Cliente</span>
-            </div>
-        </div>
+        <table style="width: 100%; margin-top: 50px; border-collapse: collapse;">
+            <tr>
+                <td style="width: 45%; border-top: 1px solid #94a3b8; text-align: center; padding-top: 8px;">
+                    <span style="font-size: 12px; font-weight: bold; color: #0f172a;" id="pdf-assinatura-prestador">Prestador</span>
+                </td>
+                <td style="width: 10%;"></td>
+                <td style="width: 45%; border-top: 1px solid #94a3b8; text-align: center; padding-top: 8px;">
+                    <span style="font-size: 12px; font-weight: bold; color: #0f172a;">Aceite Digital do Cliente</span>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <script type="module">
@@ -418,7 +500,7 @@
             nome: "", cnpj: "", telefone: "", email: "", endereco: ""
         };
 
-        let currentClientBudget = null; // Guarda o orçamento que o cliente está visualizando
+        let currentClientBudget = null;
 
         // Inicialização
         window.addEventListener('DOMContentLoaded', () => {
@@ -431,7 +513,7 @@
                 setupClientView(clientId);
             } else {
                 applyProfileData();
-                listenToDatabase(); // Inicia a escuta em tempo real
+                listenToDatabase(); 
             }
         });
 
@@ -460,7 +542,6 @@
                     document.getElementById('client-view-pagamento').innerText = b.pagamento;
                     document.getElementById('client-view-total').innerText = `R$ ${formatCurrency(b.valor)}`;
 
-                    // Se já foi respondido, esconde os botões e mostra a resposta
                     if(b.status !== 'Pendente') {
                         renderClientSuccessMessage(b.status);
                     }
@@ -482,13 +563,9 @@
             document.getElementById('btn-aprovar').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
 
             try {
-                // Atualiza o status direto no banco de dados
                 const docRef = doc(db, "orcamentos", currentClientBudget.id);
                 await updateDoc(docRef, { status: statusText });
-                
-                // Atualiza a tela do cliente removendo os botões
                 renderClientSuccessMessage(statusText);
-
             } catch(err) {
                 console.error(err);
                 alert('Ocorreu um erro ao enviar sua resposta. Tente novamente.');
@@ -519,7 +596,6 @@
         function listenToDatabase() {
             const q = query(collection(db, "orcamentos"), orderBy("timestampCriacao", "desc"));
             
-            // onSnapshot escuta o banco 24h por dia. Se o cliente clicar lá, altera aqui instantaneamente.
             onSnapshot(q, (snapshot) => {
                 orcamentos = [];
                 snapshot.forEach((doc) => {
@@ -541,7 +617,7 @@
             }
 
             const btnSubmit = document.getElementById('btn-submit-orcamento');
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando na nuvem...';
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
             btnSubmit.disabled = true;
 
             const emissao = new Date();
@@ -561,7 +637,6 @@
                 data_emissao: emissao.toISOString().split('T')[0],
                 data_validade: validade.toISOString().split('T')[0],
                 timestampCriacao: Date.now(),
-                // Incorpora os dados atuais do perfil para congelar neste orçamento
                 emissorNome: perfilEmpresa.nome,
                 emissorCnpj: perfilEmpresa.cnpj,
                 emissorTel: perfilEmpresa.telefone,
@@ -573,7 +648,7 @@
                 document.getElementById('form-orcamento').reset();
             } catch(err) {
                 console.error("Erro ao salvar:", err);
-                alert("Falha ao salvar orçamento no banco de dados.");
+                alert("Falha ao salvar orçamento.");
             } finally {
                 btnSubmit.innerHTML = 'Gerar Proposta';
                 btnSubmit.disabled = false;
@@ -604,7 +679,6 @@
                 let followUpAlertHtml = '';
                 let cardAlertStyle = '';
                 
-                // Piscar amarelo se passar de 2 dias pendente
                 if(orc.status === 'Pendente' && diffDays >= 2) {
                     cardAlertStyle = 'border-l-4 border-l-amber-500 bg-amber-50/30';
                     followUpAlertHtml = `<span class="block text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded mt-1 max-w-max pulse-alert"><i class="fas fa-clock mr-1"></i>Follow-up pendente</span>`;
@@ -613,7 +687,7 @@
                 const tr = document.createElement('tr');
                 tr.className = `border-b border-slate-100 hover:bg-slate-50/80 transition-colors highlight-update ${cardAlertStyle}`;
                 tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-900">
+                    <td class="p-3 font-semibold text-blue-600 hover:text-blue-800 cursor-pointer hover:underline" onclick="openEditModal('${orc.id}')" title="Clique para editar este orçamento">
                         ${escapeHTML(orc.cliente)}
                         ${followUpAlertHtml}
                     </td>
@@ -643,10 +717,64 @@
             processMetrics();
         }
 
+        // ==========================================
+        // FUNÇÕES DE EDIÇÃO (MODAL)
+        // ==========================================
+        window.openEditModal = (idStr) => {
+            const o = orcamentos.find(item => item.id === idStr);
+            if(!o) return;
+            
+            document.getElementById('edit-id').value = o.id;
+            document.getElementById('edit-cliente').value = o.cliente;
+            document.getElementById('edit-servico').value = o.servico;
+            document.getElementById('edit-material').value = o.material;
+            document.getElementById('edit-data_inicio').value = o.data_inicio;
+            document.getElementById('edit-data_fim').value = o.data_fim;
+            document.getElementById('edit-valor').value = o.valor;
+            document.getElementById('edit-pagamento').value = o.pagamento;
+            document.getElementById('edit-obs').value = o.obs;
+            
+            document.getElementById('edit-modal').classList.remove('hidden');
+        };
+
+        window.closeEditModal = () => {
+            document.getElementById('edit-modal').classList.add('hidden');
+        };
+
+        document.getElementById('form-edit-orcamento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const idStr = document.getElementById('edit-id').value;
+            const btn = document.getElementById('btn-salvar-edicao');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+            btn.disabled = true;
+
+            const updatedData = {
+                cliente: document.getElementById('edit-cliente').value,
+                servico: document.getElementById('edit-servico').value,
+                material: document.getElementById('edit-material').value,
+                data_inicio: document.getElementById('edit-data_inicio').value,
+                data_fim: document.getElementById('edit-data_fim').value,
+                valor: document.getElementById('edit-valor').value,
+                pagamento: document.getElementById('edit-pagamento').value,
+                obs: document.getElementById('edit-obs').value
+            };
+
+            try {
+                await updateDoc(doc(db, "orcamentos", idStr), updatedData);
+                closeEditModal();
+            } catch(err) {
+                console.error("Erro na edição:", err);
+                alert("Erro ao salvar alterações no banco de dados.");
+            } finally {
+                btn.innerHTML = 'Salvar Alterações';
+                btn.disabled = false;
+            }
+        });
+
         window.updateStatus = async (idStr, newStatus) => {
             try {
                 await updateDoc(doc(db, "orcamentos", idStr), { status: newStatus });
-                // A tabela se desenha sozinha via onSnapshot
             } catch(err) {
                 console.error(err);
                 alert("Erro ao alterar o status.");
@@ -657,7 +785,6 @@
             if(confirm('Tem certeza que deseja apagar esta proposta permanentemente?')) {
                 try {
                     await deleteDoc(doc(db, "orcamentos", idStr));
-                    // A tabela se desenha sozinha via onSnapshot
                 } catch(err) {
                     console.error(err);
                     alert("Erro ao deletar.");
@@ -669,7 +796,6 @@
             const o = orcamentos.find(item => item.id === idStr);
             if(!o) return;
 
-            // Gera o link curto passando apenas o ID da nuvem
             const clientLink = `${window.location.origin}${window.location.pathname}?view=client&id=${o.id}`;
             const msg = `Olá *${o.cliente}*,\n\nCompilamos a sua proposta para *${o.servico}*.\n\nPara visualizar os detalhes e nos enviar a sua resposta digital, clique no link abaixo:\n\n🔗 ${clientLink}\n\nFico à disposição!`;
             
@@ -754,7 +880,7 @@
             element.style.display = 'block';
             
             const options = {
-                margin:       [0.3, 0.3, 0.3, 0.3], 
+                margin:       [0.4, 0.4, 0.4, 0.4], 
                 filename:     `Orcamento_${o.cliente.replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
