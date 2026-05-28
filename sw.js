@@ -3,47 +3,34 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json'
-  // Você pode adicionar os caminhos das imagens (icon-192.png, icon-512.png) aqui se quiser
 ];
 
-// Instalação: Adiciona arquivos básicos no Cache
-self.addEventListener('install', event => {
+// Instalação: Cache dos arquivos base
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache aberto com sucesso');
-        return cache.addAll(ASSETS_TO_CACHE);
-      })
-  );
-});
-
-// Ativação: Limpa caches antigos caso a versão mude (v1 para v2, por exemplo)
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Apagando cache antigo', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
 });
 
-// Interceptação de Fetch: Retorna do cache se estiver off-line ou busca na rede
-self.addEventListener('fetch', event => {
+// Interceptação de Rede (Network First, fallback to cache)
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Retorna o arquivo do cache, se existir
-        if (response) {
-          return response;
-        }
-        // Se não existir no cache, faz a requisição na rede
-        return fetch(event.request);
+    fetch(event.request)
+      .then((response) => {
+        // Atualiza o cache com a resposta de rede mais recente
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => {
+          cache.put(event.request, clone);
+        });
+        return response;
+      })
+      .catch(() => {
+        // Se a rede falhar, busca no cache
+        return caches.match(event.request);
       })
   );
 });

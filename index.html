@@ -47,21 +47,6 @@
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
-        .pulse-alert {
-            animation: pulse-border 2s infinite;
-        }
-        @keyframes pulse-border {
-            0% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 0.4); }
-            70% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 1); }
-            100% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 0.4); }
-        }
-        .highlight-update {
-            animation: bg-flash 2s ease-out;
-        }
-        @keyframes bg-flash {
-            0% { background-color: #dbeafe; }
-            100% { background-color: transparent; }
-        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -69,8 +54,6 @@
     <div id="app-professional-view">
         <nav class="backdrop-blur-md bg-white/80 border-b border-slate-200 sticky top-0 z-40 px-6 py-4">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-                
-                <!-- AQUI FOI ALTERADO O CABEÇALHO -->
                 <div class="flex items-center gap-3">
                     <div>
                         <h1 class="text-xl font-bold tracking-tight text-slate-900" id="nav-company-name">Orçamento Fácil</h1>
@@ -79,10 +62,10 @@
                 </div>
                 
                 <div class="flex space-x-6 text-sm font-medium text-slate-600">
-                    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-2 px-1 tab-active flex items-center gap-2 transition-colors hover:text-blue-600">
+                    <button onclick="window.switchTab('dashboard')" id="tab-btn-dashboard" class="py-2 px-1 tab-active flex items-center gap-2 transition-colors hover:text-blue-600">
                         <i class="fas fa-th-large text-xs"></i> Indicadores & Orçamentos
                     </button>
-                    <button onclick="switchTab('perfil')" id="tab-btn-perfil" class="py-2 px-1 flex items-center gap-2 transition-colors hover:text-blue-600">
+                    <button onclick="window.switchTab('perfil')" id="tab-btn-perfil" class="py-2 px-1 flex items-center gap-2 transition-colors hover:text-blue-600">
                         <i class="fas fa-building text-xs"></i> Perfil da Empresa
                     </button>
                 </div>
@@ -90,8 +73,8 @@
         </nav>
 
         <main class="max-w-7xl mx-auto p-6 space-y-8">
-            
             <div id="section-dashboard" class="space-y-8">
+                <!-- KPIs -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                     <div class="bi-card p-6 flex items-center justify-between">
                         <div>
@@ -132,6 +115,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- Formulário de Orçamento -->
                     <div class="lg:col-span-1 bi-card p-6">
                         <h2 class="text-base font-bold text-slate-900 mb-5 flex items-center gap-2 border-b border-slate-100 pb-3">
                             <i class="fas fa-plus-circle text-emerald-600"></i> Estruturar Orçamento
@@ -162,7 +146,7 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label for="valor" class="block text-xs font-semibold text-slate-600 mb-1">Preço (R$)</label>
-                                    <input type="number" step="0.01" id="valor" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="0,00">
+                                    <input type="number" step="0.01" id="valor" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="0.00">
                                 </div>
                                 <div>
                                     <label for="pagamento" class="block text-xs font-semibold text-slate-600 mb-1">Condição</label>
@@ -184,6 +168,7 @@
                         </form>
                     </div>
 
+                    <!-- Tabela -->
                     <div class="lg:col-span-2 bi-card p-6">
                         <h2 class="text-base font-bold text-slate-900 mb-5 flex items-center gap-2 border-b border-slate-100 pb-3">
                             <i class="fas fa-chart-line text-blue-600"></i> Gestão de Respostas
@@ -194,12 +179,13 @@
                                     <tr class="border-b border-slate-200 text-slate-500 uppercase font-bold tracking-wider bg-slate-50/70">
                                         <th class="p-3">Cliente</th>
                                         <th class="p-3">Serviço</th>
-                                        <th class="p-3">Investimento</th>
+                                        <th class="p-3">Valor</th>
                                         <th class="p-3">Status</th>
                                         <th class="p-3 text-center">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabela-orcamentos" class="divide-y divide-slate-100 text-slate-700">
+                                    <!-- Preenchido via JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -207,6 +193,7 @@
                 </div>
             </div>
 
+            <!-- Perfil da Empresa -->
             <div id="section-perfil" class="space-y-6 hidden">
                 <div class="bi-card max-w-2xl mx-auto p-6">
                     <h2 class="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
@@ -217,27 +204,27 @@
                     <form id="form-perfil" class="space-y-4">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="prof-nome" class="block text-xs font-semibold text-slate-600 mb-1">Nome Profissional / Empresa</label>
-                                <input type="text" id="prof-nome" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Ex: Sua Empresa">
+                                <label for="prof-nome" class="block text-xs font-semibold text-slate-600 mb-1">Nome Empresa</label>
+                                <input type="text" id="prof-nome" required class="input-bi w-full rounded-lg p-2 text-sm">
                             </div>
                             <div>
                                 <label for="prof-cnpj" class="block text-xs font-semibold text-slate-600 mb-1">CNPJ / CPF</label>
-                                <input type="text" id="prof-cnpj" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="00.000.000/0001-00">
+                                <input type="text" id="prof-cnpj" required class="input-bi w-full rounded-lg p-2 text-sm">
                             </div>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label for="prof-telefone" class="block text-xs font-semibold text-slate-600 mb-1">WhatsApp (Apenas números)</label>
-                                <input type="text" id="prof-telefone" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="11999990000">
+                                <label for="prof-telefone" class="block text-xs font-semibold text-slate-600 mb-1">Telefone / WhatsApp</label>
+                                <input type="text" id="prof-telefone" required class="input-bi w-full rounded-lg p-2 text-sm">
                             </div>
                             <div>
                                 <label for="prof-email" class="block text-xs font-semibold text-slate-600 mb-1">E-mail</label>
-                                <input type="email" id="prof-email" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="contato@empresa.com">
+                                <input type="email" id="prof-email" required class="input-bi w-full rounded-lg p-2 text-sm">
                             </div>
                         </div>
                         <div>
                             <label for="prof-endereco" class="block text-xs font-semibold text-slate-600 mb-1">Endereço</label>
-                            <input type="text" id="prof-endereco" class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Rua, Número - Cidade">
+                            <input type="text" id="prof-endereco" class="input-bi w-full rounded-lg p-2 text-sm">
                         </div>
                         
                         <div class="pt-2">
@@ -251,22 +238,9 @@
         </main>
     </div>
 
-    <!-- Modais e Visualização do Cliente omitidos para brevidade, mas permanecem idênticos ao código original -->
-    <div id="edit-modal" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <!-- Manter o conteúdo original do modal de edição -->
-    </div>
-
-    <div id="app-client-view" class="max-w-3xl mx-auto p-4 sm:p-8 hidden">
-        <!-- Manter o conteúdo original da visão do cliente -->
-    </div>
-
-    <div id="pdf-template" style="display: none; background: white; color: #0f172a; padding: 30px; font-family: 'Arial', sans-serif; font-size: 12px; line-height: 1.5; width: 800px; max-width: 100%;">
-        <!-- Manter o template original do PDF -->
-    </div>
-
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC-xX-2VlLhwQGCyxaq3fXPT70B-IAM1Pg",
@@ -280,62 +254,166 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // Utilitários
         const escapeHTML = (str) => {
             if(!str) return '';
             return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
         };
         const formatCurrency = (v) => parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const formatDate = (d) => { if(!d) return '--/--/----'; const [year, month, day] = d.split('-'); return `${day}/${month}/${year}`; };
 
         let orcamentos = [];
         let perfilEmpresa = JSON.parse(localStorage.getItem('orcapro_profile_v3')) || {
             nome: "", cnpj: "", telefone: "", email: "", endereco: ""
         };
 
-        let currentClientBudget = null;
-
         window.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const clientId = params.get('id');
+            applyProfileData();
+            listenToDatabase(); 
+        });
 
-            if (params.get('view') === 'client' && clientId) {
-                document.getElementById('app-professional-view').classList.add('hidden');
-                document.getElementById('app-client-view').classList.remove('hidden');
-                setupClientView(clientId);
-            } else {
-                applyProfileData();
-                listenToDatabase(); 
+        // Aplicar dados do perfil na interface
+        function applyProfileData() {
+            document.getElementById('nav-company-name').innerText = perfilEmpresa.nome || "Orçamento Fácil";
+            document.getElementById('nav-company-cnpj').innerText = perfilEmpresa.cnpj ? `CNPJ: ${perfilEmpresa.cnpj}` : "Orçamentos Rápidos";
+            
+            document.getElementById('prof-nome').value = perfilEmpresa.nome || "";
+            document.getElementById('prof-cnpj').value = perfilEmpresa.cnpj || "";
+            document.getElementById('prof-telefone').value = perfilEmpresa.telefone || "";
+            document.getElementById('prof-email').value = perfilEmpresa.email || "";
+            document.getElementById('prof-endereco').value = perfilEmpresa.endereco || "";
+        }
+
+        // --- SALVAR PERFIL ---
+        document.getElementById('form-perfil').addEventListener('submit', (e) => {
+            e.preventDefault();
+            perfilEmpresa = {
+                nome: document.getElementById('prof-nome').value,
+                cnpj: document.getElementById('prof-cnpj').value,
+                telefone: document.getElementById('prof-telefone').value,
+                email: document.getElementById('prof-email').value,
+                endereco: document.getElementById('prof-endereco').value
+            };
+            localStorage.setItem('orcapro_profile_v3', JSON.stringify(perfilEmpresa));
+            applyProfileData();
+            alert("Perfil salvo com sucesso!");
+        });
+
+        // --- SALVAR ORÇAMENTO NO FIREBASE ---
+        document.getElementById('form-orcamento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-orcamento');
+            btn.innerText = "Salvando...";
+            btn.disabled = true;
+
+            const novoOrcamento = {
+                cliente: document.getElementById('cliente').value,
+                servico: document.getElementById('servico').value,
+                material: document.getElementById('material').value,
+                data_inicio: document.getElementById('data_inicio').value,
+                data_fim: document.getElementById('data_fim').value,
+                valor: parseFloat(document.getElementById('valor').value) || 0,
+                pagamento: document.getElementById('pagamento').value,
+                obs: document.getElementById('obs').value,
+                status: 'Pendente',
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await addDoc(collection(db, "orcamentos"), novoOrcamento);
+                document.getElementById('form-orcamento').reset();
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                alert("Falha ao salvar o orçamento.");
+            } finally {
+                btn.innerText = "Gerar Proposta";
+                btn.disabled = false;
             }
         });
 
-        // AQUI FOI ALTERADO O COMPORTAMENTO PADRÃO NO JAVASCRIPT
-        function applyProfileData() {
-            document.getElementById('nav-company-name').innerText = perfilEmpresa.nome || "Orçamento Fácil";
-            document.getElementById('nav-company-cnpj').innerText = perfilEmpresa.cnpj ? `CNPJ/CPF: ${perfilEmpresa.cnpj}` : "Orçamentos Rápidos";
-            
-            // Verifica se os elementos existem antes de tentar definir o valor
-            if (document.getElementById('prof-nome')) document.getElementById('prof-nome').value = perfilEmpresa.nome || "";
-            if (document.getElementById('prof-cnpj')) document.getElementById('prof-cnpj').value = perfilEmpresa.cnpj || "";
-            if (document.getElementById('prof-telefone')) document.getElementById('prof-telefone').value = perfilEmpresa.telefone || "";
-            if (document.getElementById('prof-email')) document.getElementById('prof-email').value = perfilEmpresa.email || "";
-            if (document.getElementById('prof-endereco')) document.getElementById('prof-endereco').value = perfilEmpresa.endereco || "";
+        // --- LER DO FIREBASE EM TEMPO REAL ---
+        function listenToDatabase() {
+            const q = query(collection(db, "orcamentos"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snapshot) => {
+                orcamentos = [];
+                let total = 0, aprovados = 0, recusados = 0;
+
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    orcamentos.push({ id: doc.id, ...data });
+                    total++;
+                    if (data.status === 'Aprovado') aprovados++;
+                    if (data.status === 'Recusado') recusados++;
+                });
+
+                document.getElementById('kpi-total').innerText = total;
+                document.getElementById('kpi-aprovados').innerText = aprovados;
+                document.getElementById('kpi-negados').innerText = recusados;
+                
+                const taxa = total > 0 ? ((aprovados / total) * 100).toFixed(1) : 0;
+                document.getElementById('kpi-conversao').innerText = `${taxa}%`;
+
+                renderTable();
+            });
         }
 
-        /* 
-         * RESTANTE DAS FUNÇÕES (listenToDatabase, renderTable, processMetrics, generatePDFReport, etc.) 
-         * permanecem idênticas ao seu código original para não quebrar a lógica do sistema. 
-         */
+        // --- RENDERIZAR TABELA ---
+        function renderTable() {
+            const tbody = document.getElementById('tabela-orcamentos');
+            tbody.innerHTML = '';
+            
+            orcamentos.forEach(orc => {
+                let badgeClass = 'bg-amber-100 text-amber-700';
+                if(orc.status === 'Aprovado') badgeClass = 'bg-emerald-100 text-emerald-700';
+                if(orc.status === 'Recusado') badgeClass = 'bg-rose-100 text-rose-700';
 
-        // --- REGISTRO DO SERVICE WORKER (PWA) ---
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-100 hover:bg-slate-50">
+                        <td class="p-3 font-medium">${escapeHTML(orc.cliente)}</td>
+                        <td class="p-3">${escapeHTML(orc.servico)}</td>
+                        <td class="p-3 font-semibold">R$ ${formatCurrency(orc.valor)}</td>
+                        <td class="p-3">
+                            <span class="${badgeClass} px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide">${orc.status}</span>
+                        </td>
+                        <td class="p-3 text-center">
+                            <button onclick="window.atualizarStatus('${orc.id}', 'Aprovado')" class="text-emerald-600 hover:text-emerald-800 mx-1" title="Aprovar"><i class="fas fa-check"></i></button>
+                            <button onclick="window.atualizarStatus('${orc.id}', 'Recusado')" class="text-rose-600 hover:text-rose-800 mx-1" title="Recusar"><i class="fas fa-times"></i></button>
+                            <button onclick="window.excluirOrcamento('${orc.id}')" class="text-slate-400 hover:text-slate-600 mx-1" title="Excluir"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- FUNÇÕES GLOBAIS (Atreladas ao window para o HTML conseguir chamar) ---
+        window.atualizarStatus = async (id, status) => {
+            await updateDoc(doc(db, "orcamentos", id), { status });
+        };
+
+        window.excluirOrcamento = async (id) => {
+            if(confirm("Tem certeza que deseja excluir esta proposta?")) {
+                await deleteDoc(doc(db, "orcamentos", id));
+            }
+        };
+
+        window.switchTab = (tabName) => {
+            document.getElementById('section-dashboard').classList.add('hidden');
+            document.getElementById('section-perfil').classList.add('hidden');
+            document.getElementById('tab-btn-dashboard').classList.remove('tab-active');
+            document.getElementById('tab-btn-perfil').classList.remove('tab-active');
+
+            if (tabName === 'dashboard') {
+                document.getElementById('section-dashboard').classList.remove('hidden');
+                document.getElementById('tab-btn-dashboard').classList.add('tab-active');
+            } else {
+                document.getElementById('section-perfil').classList.remove('hidden');
+                document.getElementById('tab-btn-perfil').classList.add('tab-active');
+            }
+        };
+
+        // Service Worker Registration
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registrado com sucesso:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.log('Falha ao registrar o Service Worker:', error);
-                    });
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
             });
         }
     </script>
