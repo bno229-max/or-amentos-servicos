@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrçaPro v4.2 - PWA e Nuvem</title>
+    <title>Orçamento Fácil</title>
     
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#2563eb">
@@ -70,12 +70,9 @@
         <nav class="backdrop-blur-md bg-white/80 border-b border-slate-200 sticky top-0 z-40 px-6 py-4">
             <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
-                        <i class="fas fa-chart-pie text-blue-600 text-lg"></i>
-                    </div>
                     <div>
-                        <h1 class="text-xl font-bold tracking-tight text-slate-900" id="nav-company-name">OrçaPro</h1>
-                        <p class="text-xs text-slate-500 font-medium" id="nav-company-cnpj">Configuração Pendente</p>
+                        <h1 class="text-xl font-bold tracking-tight text-slate-900" id="nav-company-name">Orçamento Fácil</h1>
+                        <p class="text-xs text-slate-500 font-medium" id="nav-company-cnpj">Orçamentos Rápidos e Completos</p>
                     </div>
                 </div>
                 
@@ -828,8 +825,8 @@
         });
 
         function applyProfileData() {
-            document.getElementById('nav-company-name').innerText = perfilEmpresa.nome || "OrçaPro";
-            document.getElementById('nav-company-cnpj').innerText = perfilEmpresa.cnpj ? `CNPJ/CPF: ${perfilEmpresa.cnpj}` : "Configuração Pendente";
+            document.getElementById('nav-company-name').innerText = perfilEmpresa.nome || "Orçamento Fácil";
+            document.getElementById('nav-company-cnpj').innerText = perfilEmpresa.cnpj ? `CNPJ/CPF: ${perfilEmpresa.cnpj}` : "Orçamentos Rápidos e Completos";
             
             document.getElementById('prof-nome').value = perfilEmpresa.nome || "";
             document.getElementById('prof-cnpj').value = perfilEmpresa.cnpj || "";
