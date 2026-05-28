@@ -1,11 +1,12 @@
 {
-  "name": "OrçaPro App",
-  "short_name": "OrçaPro",
-  "description": "Gestão e Geração de Orçamentos",
-  "start_url": "./",
+  "name": "Orçamento Fácil",
+  "short_name": "Orçamentos",
+  "description": "Sistema simples e rápido para emissão de orçamentos e propostas comerciais.",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#2563eb",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
