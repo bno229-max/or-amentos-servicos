@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OrçaPro v3.2 - Dashboard & Client Link</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .bi-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .bi-card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .tab-active {
+            border-bottom: 2px solid #2563eb;
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .input-bi {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            color: #0f172a;
+            transition: all 0.2s ease-in-out;
+        }
+        .input-bi:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+        /* Alerta piscante sutil para o Follow-up */
+        .pulse-alert {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 1); }
+            100% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 0.4); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <div id="app-professional-view">
+        <nav class="backdrop-blur-md bg-white/80 border-b border-slate-200 sticky top-0 z-40 px-6 py-4">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                        <i class="fas fa-chart-pie text-blue-600 text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-slate-900" id="nav-company-name">OrçaPro</h1>
+                        <p class="text-xs text-slate-500 font-medium" id="nav-company-cnpj">Configuração Pendente</p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-6 text-sm font-medium text-slate-600">
+                    <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="py-2 px-1 tab-active flex items-center gap-2 transition-colors hover:text-blue-600">
+                        <i class="fas fa-th-large text-xs"></i> Indicadores & Orçamentos
+                    </button>
+                    <button onclick="switchTab('perfil')" id="tab-btn-perfil" class="py-2 px-1 flex items-center gap-2 transition-colors hover:text-blue-600">
+                        <i class="fas fa-building text-xs"></i> Perfil da Empresa
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="max-w-7xl mx-auto p-6 space-y-8">
+            
+            <div id="section-dashboard" class="space-y-8">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="bi-card p-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total de Propostas</p>
+                            <h3 class="text-3xl font-bold text-slate-900 mt-1" id="kpi-total">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600">
+                            <i class="fas fa-file-invoice-dollar text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="bi-card p-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Projetos Aprovados</p>
+                            <h3 class="text-3xl font-bold text-emerald-600 mt-1" id="kpi-aprovados">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600">
+                            <i class="fas fa-check-double text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="bi-card p-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Propostas Recusadas</p>
+                            <h3 class="text-3xl font-bold text-rose-600 mt-1" id="kpi-negados">0</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center text-rose-600">
+                            <i class="fas fa-ban text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="bi-card p-6 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Taxa de Conversão</p>
+                            <h3 class="text-3xl font-bold text-indigo-600 mt-1" id="kpi-conversao">0%</h3>
+                        </div>
+                        <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-600">
+                            <i class="fas fa-percent text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-1 bi-card p-6">
+                        <h2 class="text-base font-bold text-slate-900 mb-5 flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <i class="fas fa-plus-circle text-emerald-600"></i> Estruturar Orçamento
+                        </h2>
+                        <form id="form-orcamento" class="space-y-4">
+                            <div>
+                                <label for="cliente" class="block text-xs font-semibold text-slate-600 mb-1">Cliente / Contratante</label>
+                                <input type="text" id="cliente" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Nome completo ou Razão Social">
+                            </div>
+                            <div>
+                                <label for="servico" class="block text-xs font-semibold text-slate-600 mb-1">Descrição do Serviço</label>
+                                <input type="text" id="servico" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Ex: Instalação elétrica residencial">
+                            </div>
+                            <div>
+                                <label for="material" class="block text-xs font-semibold text-slate-600 mb-1">Insumos & Materiais</label>
+                                <textarea id="material" rows="2" class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Listagem de itens inclusos ou necessários"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="data_inicio" class="block text-xs font-semibold text-slate-600 mb-1">Início Estimado</label>
+                                    <input type="date" id="data_inicio" required class="input-bi w-full rounded-lg p-2 text-sm">
+                                </div>
+                                <div>
+                                    <label for="data_fim" class="block text-xs font-semibold text-slate-600 mb-1">Conclusão Alvo</label>
+                                    <input type="date" id="data_fim" required class="input-bi w-full rounded-lg p-2 text-sm">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="valor" class="block text-xs font-semibold text-slate-600 mb-1">Preço (R$)</label>
+                                    <input type="number" step="0.01" id="valor" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="0,00">
+                                </div>
+                                <div>
+                                    <label for="pagamento" class="block text-xs font-semibold text-slate-600 mb-1">Condição</label>
+                                    <select id="pagamento" class="input-bi w-full rounded-lg p-2 text-sm">
+                                        <option value="Pix">Pix à Vista</option>
+                                        <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                        <option value="Boleto">Boleto Bancário</option>
+                                        <option value="Dinheiro">Dinheiro</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label for="obs" class="block text-xs font-semibold text-slate-600 mb-1">Observações</label>
+                                <textarea id="obs" rows="2" class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Condições específicas"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] text-white text-sm font-semibold py-2.5 rounded-lg transition-all duration-300 mt-2 shadow-sm">
+                                Gerar Proposta
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="lg:col-span-2 bi-card p-6">
+                        <h2 class="text-base font-bold text-slate-900 mb-5 flex items-center gap-2 border-b border-slate-100 pb-3">
+                            <i class="fas fa-chart-line text-blue-600"></i> Gestão de Respostas
+                        </h2>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-slate-500 uppercase font-bold tracking-wider bg-slate-50/70">
+                                        <th class="p-3">Cliente</th>
+                                        <th class="p-3">Serviço</th>
+                                        <th class="p-3">Investimento</th>
+                                        <th class="p-3">Status</th>
+                                        <th class="p-3 text-center">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-orcamentos" class="divide-y divide-slate-100 text-slate-700">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="section-perfil" class="space-y-6 hidden">
+                <div class="bi-card max-w-2xl mx-auto p-6">
+                    <h2 class="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
+                        <i class="fas fa-sliders-h text-blue-600"></i> Parâmetros Organizacionais
+                    </h2>
+                    <p class="text-xs text-slate-500 mb-6">Insira os dados cadastrais que serão vinculados aos relatórios.</p>
+                    
+                    <form id="form-perfil" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="prof-nome" class="block text-xs font-semibold text-slate-600 mb-1">Nome Profissional / Empresa</label>
+                                <input type="text" id="prof-nome" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Ex: Sua Empresa">
+                            </div>
+                            <div>
+                                <label for="prof-cnpj" class="block text-xs font-semibold text-slate-600 mb-1">CNPJ / CPF</label>
+                                <input type="text" id="prof-cnpj" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="00.000.000/0001-00">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="prof-telefone" class="block text-xs font-semibold text-slate-600 mb-1">WhatsApp (Apenas números)</label>
+                                <input type="text" id="prof-telefone" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="11999990000">
+                            </div>
+                            <div>
+                                <label for="prof-email" class="block text-xs font-semibold text-slate-600 mb-1">E-mail</label>
+                                <input type="email" id="prof-email" required class="input-bi w-full rounded-lg p-2 text-sm" placeholder="contato@empresa.com">
+                            </div>
+                        </div>
+                        <div>
+                            <label for="prof-endereco" class="block text-xs font-semibold text-slate-600 mb-1">Endereço</label>
+                            <input type="text" id="prof-endereco" class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Rua, Número - Cidade">
+                        </div>
+                        
+                        <div class="pt-2">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 hover:scale-[1.02] text-white text-sm font-semibold py-2 px-4 rounded-lg transition-all duration-300 shadow-sm">
+                                Salvar Configurações
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="app-client-view" class="max-w-3xl mx-auto p-4 sm:p-8 hidden">
+        <div class="bi-card p-6 sm:p-10 bg-white space-y-8">
+            <div class="flex justify-between items-start border-b border-slate-200 pb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-900" id="client-view-provider">Nome do Prestador</h2>
+                    <p class="text-xs text-slate-500 mt-1" id="client-view-provider-cnpj">CNPJ: 00.000.000/0001-00</p>
+                    <p class="text-xs text-slate-500" id="client-view-provider-contact">Contato: email@provedor.com</p>
+                </div>
+                <div class="w-16 h-16 bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center overflow-hidden">
+                    <i class="fas fa-file-signature text-2xl text-blue-600"></i>
+                </div>
+            </div>
+
+            <div class="bg-slate-50 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm border border-slate-100">
+                <div>
+                    <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Apresentado a:</span>
+                    <p class="font-bold text-slate-800" id="client-view-customer">Nome do Cliente</p>
+                </div>
+                <div class="sm:text-right">
+                    <p class="text-slate-600"><strong>Emissão:</strong> <span id="client-view-emissao">--/--/----</span></p>
+                    <p class="text-rose-600 font-medium"><strong>Validade:</strong> <span id="client-view-validade">--/--/----</span></p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-1">1. Escopo dos Serviços</h3>
+                    <p class="text-slate-600 text-sm mt-2" id="client-view-servico">Descrição</p>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-1">2. Materiais</h3>
+                    <p class="text-slate-600 text-sm mt-2 whitespace-pre-line" id="client-view-materiais">Materiais</p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-1">3. Início Previsto</h3>
+                        <p class="text-slate-600 text-sm mt-2" id="client-view-inicio">--/--/----</p>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-1">4. Conclusão</h3>
+                        <p class="text-slate-600 text-sm mt-2" id="client-view-fim">--/--/----</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div>
+                    <span class="text-xs text-slate-500 uppercase font-semibold">Pagamento</span>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5" id="client-view-pagamento">Pix</p>
+                </div>
+                <div class="text-center sm:text-right">
+                    <span class="text-xs text-slate-500 uppercase font-semibold">Investimento Total</span>
+                    <p class="text-2xl font-bold text-blue-700" id="client-view-total">R$ 0,00</p>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-6 space-y-4">
+                <h3 class="text-base font-bold text-slate-900 text-center">Assinatura Formal & Aceite</h3>
+                <p class="text-xs text-slate-500 text-center">Insira seu nome completo abaixo para assinar digitalmente.</p>
+                
+                <div class="max-w-md mx-auto space-y-4">
+                    <input type="text" id="client-signature-input" class="input-bi w-full rounded-lg p-3 text-center text-base font-serif italic tracking-wide" placeholder="Digite seu nome completo">
+                    
+                    <div class="flex gap-4">
+                        <button onclick="submitClientAction('Recusado')" class="w-1/2 bg-rose-50 hover:bg-rose-100 hover:scale-[1.02] text-rose-700 font-semibold py-3 rounded-lg text-sm transition-all duration-300 border border-rose-200">
+                            Recusar
+                        </button>
+                        <button onclick="submitClientAction('Aprovado')" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] text-white font-semibold py-3 rounded-lg text-sm transition-all duration-300 shadow-md">
+                            Assinar e Aprovar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="pdf-template" style="display: none; background: white; color: #0f172a; padding: 20px 30px; font-family: 'Arial', sans-serif; font-size: 12px; line-height: 1.4;">
+        
+        <div style="display: table; width: 100%; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; margin-bottom: 15px;">
+            <div style="display: table-cell; vertical-align: middle; width: 40%;">
+                <div style="font-size: 20px; font-weight: bold; color: #1e3a8a;">PROPOSTA</div>
+            </div>
+            <div style="display: table-cell; text-align: right; vertical-align: middle;">
+                <h1 style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 700;" id="pdf-emissor-nome">Empresa</h1>
+                <p style="margin: 2px 0; color: #475569; font-size: 11px;" id="pdf-emissor-cnpj">CNPJ:</p>
+                <p style="margin: 2px 0; color: #475569; font-size: 11px;" id="pdf-emissor-contatos">Tel: | Email:</p>
+            </div>
+        </div>
+
+        <div style="display: table; width: 100%; margin-bottom: 15px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px;">
+            <div style="display: table-cell; width: 50%;">
+                <h4 style="margin: 0 0 4px 0; color: #1e3a8a; font-size: 10px; text-transform: uppercase;">Apresentado a</h4>
+                <p style="margin: 0; font-size: 13px; font-weight: bold;" id="pdf-cliente-nome">Cliente</p>
+            </div>
+            <div style="display: table-cell; width: 50%; text-align: right; font-size: 11px;">
+                <p style="margin: 2px 0;"><strong>Emissão:</strong> <span id="pdf-data-emissao">--</span></p>
+                <p style="margin: 2px 0; color: #b91c1c;"><strong>Validade:</strong> <span id="pdf-data-validade">--</span></p>
+            </div>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">1. Escopo Técnico</h3>
+            <p style="margin: 0; font-size: 12px; color: #334155;" id="pdf-servico-desc">Descrição</p>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">2. Materiais e Recursos</h3>
+            <p style="margin: 0; font-size: 12px; color: #334155; white-space: pre-line;" id="pdf-material-desc">Materiais</p>
+        </div>
+
+        <div style="display: table; width: 100%; margin-bottom: 15px;">
+            <div style="display: table-cell; width: 50%; padding-right: 10px;">
+                <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">3. Prazos</h3>
+                <p style="margin: 2px 0; font-size: 11px;"><strong>Início:</strong> <span id="pdf-cron-inicio">--</span></p>
+                <p style="margin: 2px 0; font-size: 11px;"><strong>Conclusão:</strong> <span id="pdf-cron-fim">--</span></p>
+            </div>
+            <div style="display: table-cell; width: 50%; padding-left: 10px;">
+                <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; margin-bottom: 6px; color: #0f172a; font-size: 13px;">4. Observações</h3>
+                <p style="margin: 0; font-size: 11px; color: #475569;" id="pdf-obs-desc">-</p>
+            </div>
+        </div>
+
+        <div style="background: #eff6ff; padding: 15px; border-radius: 6px; margin-bottom: 30px; display: table; width: 100%; border: 1px solid #bfdbfe;">
+            <div style="display: table-cell; width: 60%; vertical-align: middle;">
+                <p style="margin: 0; font-size: 11px; color: #475569; text-transform: uppercase;">Condição de Pagamento</p>
+                <p style="margin: 2px 0 0 0; font-size: 13px; font-weight: bold; color: #0f172a;" id="pdf-cond-pagamento">Forma</p>
+            </div>
+            <div style="display: table-cell; width: 40%; text-align: right; vertical-align: middle;">
+                <p style="margin: 0; font-size: 10px; text-transform: uppercase; color: #475569; font-weight: bold;">Investimento Total</p>
+                <p style="margin: 2px 0 0 0; font-size: 20px; font-weight: bold; color: #1d4ed8;">R$ <span id="pdf-valor-total">0,00</span></p>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; display: table; width: 100%;">
+            <div style="display: table-cell; width: 45%; border-top: 1px solid #94a3b8; text-align: center; padding-top: 5px;">
+                <span style="font-size: 11px; font-weight: bold;" id="pdf-assinatura-prestador">Prestador</span>
+            </div>
+            <div style="display: table-cell; width: 10%;"></div>
+            <div style="display: table-cell; width: 45%; border-top: 1px solid #94a3b8; text-align: center; padding-top: 5px;">
+                <span style="font-size: 11px; font-weight: bold;">Aceite Digital do Cliente</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função para escapar HTML prevenindo XSS
+        const escapeHTML = (str) => {
+            if(!str) return '';
+            return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
+        };
+
+        let orcamentos = JSON.parse(localStorage.getItem('orcapro_data_v3')) || [];
+        let perfilEmpresa = JSON.parse(localStorage.getItem('orcapro_profile_v3')) || {
+            nome: "", cnpj: "", telefone: "", email: "", endereco: ""
+        };
+
+        const formOrcamento = document.getElementById('form-orcamento');
+        const formPerfil = document.getElementById('form-perfil');
+        const tabelaOrcamentos = document.getElementById('tabela-orcamentos');
+
+        const formatCurrency = (v) => parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formatDate = (d) => { if(!d) return '--/--/----'; const [year, month, day] = d.split('-'); return `${day}/${month}/${year}`; };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('view') === 'client' && params.get('d')) {
+                document.getElementById('app-professional-view').classList.add('hidden');
+                document.getElementById('app-client-view').classList.remove('hidden');
+                setupClientView(params.get('d'));
+            } else {
+                applyProfileData();
+                renderTable();
+            }
+        });
+
+        let currentClientBudget = null;
+        function setupClientView(base64Data) {
+            try {
+                const jsonString = decodeURIComponent(escape(atob(base64Data)));
+                currentClientBudget = JSON.parse(jsonString);
+                const b = currentClientBudget;
+
+                document.getElementById('client-view-provider').innerText = b.emissorNome;
+                document.getElementById('client-view-provider-cnpj').innerText = b.emissorCnpj ? `CNPJ/CPF: ${b.emissorCnpj}` : '';
+                document.getElementById('client-view-provider-contact').innerText = `Tel: ${b.emissorTel} | ${b.emissorEmail}`;
+                document.getElementById('client-view-customer').innerText = b.cliente;
+                document.getElementById('client-view-emissao').innerText = formatDate(b.data_emissao);
+                document.getElementById('client-view-validade').innerText = formatDate(b.data_validade);
+                document.getElementById('client-view-servico').innerText = b.servico;
+                document.getElementById('client-view-materiais').innerText = b.material || 'Nenhum material listado.';
+                document.getElementById('client-view-inicio').innerText = formatDate(b.data_inicio);
+                document.getElementById('client-view-fim').innerText = formatDate(b.data_fim);
+                document.getElementById('client-view-pagamento').innerText = b.pagamento;
+                document.getElementById('client-view-total').innerText = `R$ ${formatCurrency(b.valor)}`;
+            } catch (err) {
+                alert('Link de proposta inválido ou expirado.');
+            }
+        }
+
+        function submitClientAction(statusText) {
+            const signature = document.getElementById('client-signature-input').value.trim();
+            if(statusText === 'Aprovado' && !signature) {
+                alert('Por favor, digite seu nome completo para assinar.');
+                return;
+            }
+
+            const msg = statusText === 'Aprovado' 
+                ? `Olá! Analisei a proposta para *${currentClientBudget.servico}* e gostaria de confirmar o *ACEITE DIGITAL*.\n\n✍️ *Assinado por:* ${signature}\n💰 *Valor:* R$ ${formatCurrency(currentClientBudget.valor)}\n\nFico no aguardo dos próximos passos!`
+                : `Olá. Infelizmente não poderei seguir com a proposta para *${currentClientBudget.servico}* neste momento. Obrigado pela atenção.`;
+
+            window.open(`https://wa.me/${currentClientBudget.emissorTel}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        function switchTab(tabId) {
+            document.getElementById('section-dashboard').classList.add('hidden');
+            document.getElementById('section-perfil').classList.add('hidden');
+            document.getElementById('tab-btn-dashboard').classList.remove('tab-active');
+            document.getElementById('tab-btn-perfil').classList.remove('tab-active');
+
+            if(tabId === 'dashboard') {
+                document.getElementById('section-dashboard').classList.remove('hidden');
+                document.getElementById('tab-btn-dashboard').classList.add('tab-active');
+            } else if(tabId === 'perfil') {
+                document.getElementById('section-perfil').classList.remove('hidden');
+                document.getElementById('tab-btn-perfil').classList.add('tab-active');
+            }
+        }
+
+        function applyProfileData() {
+            document.getElementById('nav-company-name').innerText = perfilEmpresa.nome || "OrçaPro";
+            document.getElementById('nav-company-cnpj').innerText = perfilEmpresa.cnpj ? `CNPJ/CPF: ${perfilEmpresa.cnpj}` : "Configuração Pendente";
+            
+            document.getElementById('prof-nome').value = perfilEmpresa.nome || "";
+            document.getElementById('prof-cnpj').value = perfilEmpresa.cnpj || "";
+            document.getElementById('prof-telefone').value = perfilEmpresa.telefone || "";
+            document.getElementById('prof-email').value = perfilEmpresa.email || "";
+            document.getElementById('prof-endereco').value = perfilEmpresa.endereco || "";
+        }
+
+        function processMetrics() {
+            const total = orcamentos.length;
+            const aprovados = orcamentos.filter(o => o.status === 'Aprovado').length;
+            const negados = orcamentos.filter(o => o.status === 'Negado').length;
+            const conversao = total > 0 ? ((aprovados / total) * 100).toFixed(1) : 0;
+
+            document.getElementById('kpi-total').innerText = total;
+            document.getElementById('kpi-aprovados').innerText = aprovados;
+            document.getElementById('kpi-negados').innerText = negados;
+            document.getElementById('kpi-conversao').innerText = `${conversao}%`;
+        }
+
+        function renderTable() {
+            tabelaOrcamentos.innerHTML = '';
+            if(orcamentos.length === 0) {
+                tabelaOrcamentos.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-medium">Nenhum orçamento registrado.</td></tr>`;
+                processMetrics();
+                return;
+            }
+
+            const hoje = new Date();
+
+            orcamentos.forEach((orc, index) => {
+                let badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                if(orc.status === 'Aprovado') badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                if(orc.status === 'Negado') badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+
+                const dataEmissao = new Date(orc.data_emissao + 'T00:00:00');
+                const diffTime = Math.abs(hoje - dataEmissao);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                let followUpAlertHtml = '';
+                let cardAlertStyle = '';
+                if(orc.status === 'Pendente' && diffDays >= 2) {
+                    cardAlertStyle = 'border-l-4 border-l-amber-500';
+                    followUpAlertHtml = `<span class="block text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded mt-1 max-w-max"><i class="fas fa-clock mr-1"></i>Follow-up pendente</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = `border-b border-slate-100 hover:bg-slate-50/80 transition-colors ${cardAlertStyle}`;
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-900">
+                        ${escapeHTML(orc.cliente)}
+                        ${followUpAlertHtml}
+                    </td>
+                    <td class="p-3 font-medium text-slate-600 max-w-[180px] truncate">${escapeHTML(orc.servico)}</td>
+                    <td class="p-3 font-semibold text-slate-900">R$ ${formatCurrency(orc.valor)}</td>
+                    <td class="p-3">
+                        <select onchange="updateStatus(${index}, this.value)" class="text-xs font-semibold rounded-md border p-1.5 outline-none cursor-pointer ${badgeClass}">
+                            <option value="Pendente" ${orc.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Aprovado" ${orc.status === 'Aprovado' ? 'selected' : ''}>Aprovado</option>
+                            <option value="Negado" ${orc.status === 'Negado' ? 'selected' : ''}>Negado</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-center space-x-3">
+                        <button onclick="triggerWhatsAppLink(${index})" class="text-emerald-600 hover:text-emerald-700 hover:scale-110 font-medium transition-all" title="Link via WhatsApp">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                        </button>
+                        <button onclick="generatePDFReport(${index})" class="text-slate-400 hover:text-blue-600 hover:scale-110 font-medium transition-all" title="Baixar PDF">
+                            <i class="fas fa-file-pdf text-lg"></i>
+                        </button>
+                        <button onclick="deleteBudget(${index})" class="text-slate-300 hover:text-rose-600 hover:scale-110 transition-all" title="Excluir">
+                            <i class="fas fa-trash-alt text-lg"></i>
+                        </button>
+                    </td>
+                `;
+                tabelaOrcamentos.appendChild(tr);
+            });
+            processMetrics();
+        }
+
+        formOrcamento.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const emissao = new Date();
+            const validade = new Date(emissao);
+            validade.setDate(validade.getDate() + 5);
+
+            const novoOrcamento = {
+                cliente: document.getElementById('cliente').value,
+                servico: document.getElementById('servico').value,
+                material: document.getElementById('material').value,
+                data_inicio: document.getElementById('data_inicio').value,
+                data_fim: document.getElementById('data_fim').value,
+                valor: document.getElementById('valor').value,
+                pagamento: document.getElementById('pagamento').value,
+                obs: document.getElementById('obs').value,
+                status: 'Pendente',
+                data_emissao: emissao.toISOString().split('T')[0],
+                data_validade: validade.toISOString().split('T')[0]
+            };
+
+            orcamentos.push(novoOrcamento);
+            localStorage.setItem('orcapro_data_v3', JSON.stringify(orcamentos));
+            formOrcamento.reset();
+            renderTable();
+        });
+
+        formPerfil.addEventListener('submit', (e) => {
+            e.preventDefault();
+            perfilEmpresa.nome = document.getElementById('prof-nome').value;
+            perfilEmpresa.cnpj = document.getElementById('prof-cnpj').value;
+            perfilEmpresa.telefone = document.getElementById('prof-telefone').value;
+            perfilEmpresa.email = document.getElementById('prof-email').value;
+            perfilEmpresa.endereco = document.getElementById('prof-endereco').value;
+
+            localStorage.setItem('orcapro_profile_v3', JSON.stringify(perfilEmpresa));
+            applyProfileData();
+            alert('Perfil atualizado!');
+            switchTab('dashboard');
+        });
+
+        window.updateStatus = (index, status) => {
+            orcamentos[index].status = status;
+            localStorage.setItem('orcapro_data_v3', JSON.stringify(orcamentos));
+            renderTable();
+        };
+
+        window.deleteBudget = (index) => {
+            if(confirm('Apagar esta proposta?')) {
+                orcamentos.splice(index, 1);
+                localStorage.setItem('orcapro_data_v3', JSON.stringify(orcamentos));
+                renderTable();
+            }
+        };
+
+        window.triggerWhatsAppLink = (index) => {
+            if(!perfilEmpresa.telefone) {
+                alert('Configure seu WhatsApp no "Perfil da Empresa" antes de enviar links.');
+                return;
+            }
+
+            const o = orcamentos[index];
+            
+            const payload = {
+                ...o,
+                emissorNome: perfilEmpresa.nome,
+                emissorCnpj: perfilEmpresa.cnpj,
+                emissorTel: perfilEmpresa.telefone,
+                emissorEmail: perfilEmpresa.email
+            };
+
+            const base64Data = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+            const clientLink = `${window.location.origin}${window.location.pathname}?view=client&d=${base64Data}`;
+
+            const msg = `Olá *${o.cliente}*,\n\nCompilamos a sua proposta para *${o.servico}*.\n\nPara visualizar valores e realizar o *Aceite Digital*, clique no link abaixo:\n\n🔗 ${clientLink}\n\nFico à disposição!`;
+            
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        window.generatePDFReport = (index) => {
+            const o = orcamentos[index];
+            document.getElementById('pdf-emissor-nome').innerText = perfilEmpresa.nome || "Prestador";
+            document.getElementById('pdf-emissor-cnpj').innerText = perfilEmpresa.cnpj ? `CNPJ/CPF: ${perfilEmpresa.cnpj}` : "";
+            document.getElementById('pdf-emissor-contatos').innerText = `Tel: ${perfilEmpresa.telefone || ''} | E-mail: ${perfilEmpresa.email || ''}`;
+            document.getElementById('pdf-assinatura-prestador').innerText = perfilEmpresa.nome || "Prestador";
+
+            document.getElementById('pdf-cliente-nome').innerText = o.cliente;
+            document.getElementById('pdf-data-emissao').innerText = formatDate(o.data_emissao);
+            document.getElementById('pdf-data-validade').innerText = formatDate(o.data_validade);
+            document.getElementById('pdf-servico-desc').innerText = o.servico;
+            document.getElementById('pdf-material-desc').innerText = o.material || "Sem materiais extras.";
+            document.getElementById('pdf-cron-inicio').innerText = formatDate(o.data_inicio);
+            document.getElementById('pdf-cron-fim').innerText = formatDate(o.data_fim);
+            document.getElementById('pdf-obs-desc').innerText = o.obs || "Sem observações.";
+            document.getElementById('pdf-cond-pagamento').innerText = o.pagamento;
+            document.getElementById('pdf-valor-total').innerText = formatCurrency(o.valor);
+
+            const element = document.getElementById('pdf-template');
+            element.style.display = 'block';
+            
+            const options = {
+                margin:       [0.3, 0.3, 0.3, 0.3], 
+                filename:     `Orcamento_${o.cliente.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(options).from(element).save().then(() => {
+                element.style.display = 'none';
+            });
+        };
+    </script>
+</body>
+</html>
