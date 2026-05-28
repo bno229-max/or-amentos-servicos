@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OrçaPro v3.2 - Dashboard & Client Link</title>
+    <title>OrçaPro v4.0 - Nuvem & Tempo Real</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -42,7 +42,7 @@
             border-color: #2563eb;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
         }
-        /* Alerta piscante sutil para o Follow-up */
+        /* Alerta piscante para Follow-up pendente e Atualizações de Status */
         .pulse-alert {
             animation: pulse-border 2s infinite;
         }
@@ -50,6 +50,13 @@
             0% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 0.4); }
             70% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 1); }
             100% { box-shadow: inset 4px 0 0 0 rgba(245, 158, 11, 0.4); }
+        }
+        .highlight-update {
+            animation: bg-flash 2s ease-out;
+        }
+        @keyframes bg-flash {
+            0% { background-color: #dbeafe; }
+            100% { background-color: transparent; }
         }
     </style>
 </head>
@@ -168,7 +175,7 @@
                                 <label for="obs" class="block text-xs font-semibold text-slate-600 mb-1">Observações</label>
                                 <textarea id="obs" rows="2" class="input-bi w-full rounded-lg p-2 text-sm" placeholder="Condições específicas"></textarea>
                             </div>
-                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] text-white text-sm font-semibold py-2.5 rounded-lg transition-all duration-300 mt-2 shadow-sm">
+                            <button type="submit" id="btn-submit-orcamento" class="w-full bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] text-white text-sm font-semibold py-2.5 rounded-lg transition-all duration-300 mt-2 shadow-sm">
                                 Gerar Proposta
                             </button>
                         </form>
@@ -257,7 +264,7 @@
             <div class="bg-slate-50 rounded-lg p-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm border border-slate-100">
                 <div>
                     <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Apresentado a:</span>
-                    <p class="font-bold text-slate-800" id="client-view-customer">Nome do Cliente</p>
+                    <p class="font-bold text-slate-800" id="client-view-customer">Carregando...</p>
                 </div>
                 <div class="sm:text-right">
                     <p class="text-slate-600"><strong>Emissão:</strong> <span id="client-view-emissao">--/--/----</span></p>
@@ -268,11 +275,11 @@
             <div class="space-y-4">
                 <div>
                     <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-1">1. Escopo dos Serviços</h3>
-                    <p class="text-slate-600 text-sm mt-2" id="client-view-servico">Descrição</p>
+                    <p class="text-slate-600 text-sm mt-2" id="client-view-servico">...</p>
                 </div>
                 <div>
                     <h3 class="text-sm font-bold text-slate-800 border-b border-slate-100 pb-1">2. Materiais</h3>
-                    <p class="text-slate-600 text-sm mt-2 whitespace-pre-line" id="client-view-materiais">Materiais</p>
+                    <p class="text-slate-600 text-sm mt-2 whitespace-pre-line" id="client-view-materiais">...</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -289,7 +296,7 @@
             <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-5 flex flex-col sm:flex-row justify-between items-center gap-4">
                 <div>
                     <span class="text-xs text-slate-500 uppercase font-semibold">Pagamento</span>
-                    <p class="text-sm font-bold text-slate-800 mt-0.5" id="client-view-pagamento">Pix</p>
+                    <p class="text-sm font-bold text-slate-800 mt-0.5" id="client-view-pagamento">...</p>
                 </div>
                 <div class="text-center sm:text-right">
                     <span class="text-xs text-slate-500 uppercase font-semibold">Investimento Total</span>
@@ -297,28 +304,23 @@
                 </div>
             </div>
 
-            <div class="border-t border-slate-200 pt-6 space-y-4">
-                <h3 class="text-base font-bold text-slate-900 text-center">Assinatura Formal & Aceite</h3>
-                <p class="text-xs text-slate-500 text-center">Insira seu nome completo abaixo para assinar digitalmente.</p>
+            <div id="client-action-area" class="border-t border-slate-200 pt-6 space-y-4">
+                <h3 class="text-base font-bold text-slate-900 text-center">Decisão da Proposta</h3>
+                <p class="text-xs text-slate-500 text-center">Por favor, selecione abaixo se deseja dar andamento ou recusar a proposta.</p>
                 
-                <div class="max-w-md mx-auto space-y-4">
-                    <input type="text" id="client-signature-input" class="input-bi w-full rounded-lg p-3 text-center text-base font-serif italic tracking-wide" placeholder="Digite seu nome completo">
-                    
-                    <div class="flex gap-4">
-                        <button onclick="submitClientAction('Recusado')" class="w-1/2 bg-rose-50 hover:bg-rose-100 hover:scale-[1.02] text-rose-700 font-semibold py-3 rounded-lg text-sm transition-all duration-300 border border-rose-200">
-                            Recusar
-                        </button>
-                        <button onclick="submitClientAction('Aprovado')" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] text-white font-semibold py-3 rounded-lg text-sm transition-all duration-300 shadow-md">
-                            Assinar e Aprovar
-                        </button>
-                    </div>
+                <div class="max-w-md mx-auto flex gap-4 mt-4">
+                    <button id="btn-recusar" onclick="submitClientAction('Negado')" class="w-1/2 bg-rose-50 hover:bg-rose-100 hover:scale-[1.02] text-rose-700 font-semibold py-3 rounded-lg text-sm transition-all duration-300 border border-rose-200">
+                        Recusar Orçamento
+                    </button>
+                    <button id="btn-aprovar" onclick="submitClientAction('Aprovado')" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 hover:scale-[1.02] text-white font-semibold py-3 rounded-lg text-sm transition-all duration-300 shadow-md">
+                        Aceitar Orçamento
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="pdf-template" style="display: none; background: white; color: #0f172a; padding: 20px 30px; font-family: 'Arial', sans-serif; font-size: 12px; line-height: 1.4;">
-        
         <div style="display: table; width: 100%; border-bottom: 2px solid #cbd5e1; padding-bottom: 10px; margin-bottom: 15px;">
             <div style="display: table-cell; vertical-align: middle; width: 40%;">
                 <div style="font-size: 20px; font-weight: bold; color: #1e3a8a;">PROPOSTA</div>
@@ -385,76 +387,299 @@
         </div>
     </div>
 
-    <script>
-        // Função para escapar HTML prevenindo XSS
+    <script type="module">
+        // Importações do Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Sua Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-xX-2VlLhwQGCyxaq3fXPT70B-IAM1Pg",
+            authDomain: "gerador-de-orcamento-cba58.firebaseapp.com",
+            projectId: "gerador-de-orcamento-cba58",
+            storageBucket: "gerador-de-orcamento-cba58.firebasestorage.app",
+            messagingSenderId: "983355971438",
+            appId: "1:983355971438:web:ed3747b24ce6ab6674537f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Funções de formatação e segurança
         const escapeHTML = (str) => {
             if(!str) return '';
             return str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag]));
         };
+        const formatCurrency = (v) => parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const formatDate = (d) => { if(!d) return '--/--/----'; const [year, month, day] = d.split('-'); return `${day}/${month}/${year}`; };
 
-        let orcamentos = JSON.parse(localStorage.getItem('orcapro_data_v3')) || [];
+        let orcamentos = [];
         let perfilEmpresa = JSON.parse(localStorage.getItem('orcapro_profile_v3')) || {
             nome: "", cnpj: "", telefone: "", email: "", endereco: ""
         };
 
-        const formOrcamento = document.getElementById('form-orcamento');
-        const formPerfil = document.getElementById('form-perfil');
-        const tabelaOrcamentos = document.getElementById('tabela-orcamentos');
+        let currentClientBudget = null; // Guarda o orçamento que o cliente está visualizando
 
-        const formatCurrency = (v) => parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const formatDate = (d) => { if(!d) return '--/--/----'; const [year, month, day] = d.split('-'); return `${day}/${month}/${year}`; };
-
+        // Inicialização
         window.addEventListener('DOMContentLoaded', () => {
             const params = new URLSearchParams(window.location.search);
-            if (params.get('view') === 'client' && params.get('d')) {
+            const clientId = params.get('id');
+
+            if (params.get('view') === 'client' && clientId) {
                 document.getElementById('app-professional-view').classList.add('hidden');
                 document.getElementById('app-client-view').classList.remove('hidden');
-                setupClientView(params.get('d'));
+                setupClientView(clientId);
             } else {
                 applyProfileData();
-                renderTable();
+                listenToDatabase(); // Inicia a escuta em tempo real
             }
         });
 
-        let currentClientBudget = null;
-        function setupClientView(base64Data) {
+        // ==========================================
+        // ÁREA DO CLIENTE
+        // ==========================================
+        async function setupClientView(id) {
             try {
-                const jsonString = decodeURIComponent(escape(atob(base64Data)));
-                currentClientBudget = JSON.parse(jsonString);
-                const b = currentClientBudget;
+                const docRef = doc(db, "orcamentos", id);
+                const docSnap = await getDoc(docRef);
 
-                document.getElementById('client-view-provider').innerText = b.emissorNome;
-                document.getElementById('client-view-provider-cnpj').innerText = b.emissorCnpj ? `CNPJ/CPF: ${b.emissorCnpj}` : '';
-                document.getElementById('client-view-provider-contact').innerText = `Tel: ${b.emissorTel} | ${b.emissorEmail}`;
-                document.getElementById('client-view-customer').innerText = b.cliente;
-                document.getElementById('client-view-emissao').innerText = formatDate(b.data_emissao);
-                document.getElementById('client-view-validade').innerText = formatDate(b.data_validade);
-                document.getElementById('client-view-servico').innerText = b.servico;
-                document.getElementById('client-view-materiais').innerText = b.material || 'Nenhum material listado.';
-                document.getElementById('client-view-inicio').innerText = formatDate(b.data_inicio);
-                document.getElementById('client-view-fim').innerText = formatDate(b.data_fim);
-                document.getElementById('client-view-pagamento').innerText = b.pagamento;
-                document.getElementById('client-view-total').innerText = `R$ ${formatCurrency(b.valor)}`;
+                if (docSnap.exists()) {
+                    currentClientBudget = { id: docSnap.id, ...docSnap.data() };
+                    const b = currentClientBudget;
+
+                    document.getElementById('client-view-provider').innerText = b.emissorNome || "Prestador";
+                    document.getElementById('client-view-provider-cnpj').innerText = b.emissorCnpj ? `CNPJ/CPF: ${b.emissorCnpj}` : '';
+                    document.getElementById('client-view-provider-contact').innerText = `Tel: ${b.emissorTel} | ${b.emissorEmail}`;
+                    document.getElementById('client-view-customer').innerText = b.cliente;
+                    document.getElementById('client-view-emissao').innerText = formatDate(b.data_emissao);
+                    document.getElementById('client-view-validade').innerText = formatDate(b.data_validade);
+                    document.getElementById('client-view-servico').innerText = b.servico;
+                    document.getElementById('client-view-materiais').innerText = b.material || 'Nenhum material listado.';
+                    document.getElementById('client-view-inicio').innerText = formatDate(b.data_inicio);
+                    document.getElementById('client-view-fim').innerText = formatDate(b.data_fim);
+                    document.getElementById('client-view-pagamento').innerText = b.pagamento;
+                    document.getElementById('client-view-total').innerText = `R$ ${formatCurrency(b.valor)}`;
+
+                    // Se já foi respondido, esconde os botões e mostra a resposta
+                    if(b.status !== 'Pendente') {
+                        renderClientSuccessMessage(b.status);
+                    }
+                } else {
+                    document.getElementById('client-view-customer').innerText = "Orçamento não encontrado ou excluído.";
+                    document.getElementById('client-action-area').classList.add('hidden');
+                }
             } catch (err) {
-                alert('Link de proposta inválido ou expirado.');
+                console.error("Erro ao carregar do Firebase:", err);
+                alert("Falha de conexão. Verifique sua internet.");
             }
         }
 
-        function submitClientAction(statusText) {
-            const signature = document.getElementById('client-signature-input').value.trim();
-            if(statusText === 'Aprovado' && !signature) {
-                alert('Por favor, digite seu nome completo para assinar.');
+        window.submitClientAction = async (statusText) => {
+            if(!currentClientBudget) return;
+            
+            document.getElementById('btn-aprovar').disabled = true;
+            document.getElementById('btn-recusar').disabled = true;
+            document.getElementById('btn-aprovar').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+            try {
+                // Atualiza o status direto no banco de dados
+                const docRef = doc(db, "orcamentos", currentClientBudget.id);
+                await updateDoc(docRef, { status: statusText });
+                
+                // Atualiza a tela do cliente removendo os botões
+                renderClientSuccessMessage(statusText);
+
+            } catch(err) {
+                console.error(err);
+                alert('Ocorreu um erro ao enviar sua resposta. Tente novamente.');
+                document.getElementById('btn-aprovar').disabled = false;
+                document.getElementById('btn-recusar').disabled = false;
+                document.getElementById('btn-aprovar').innerText = 'Aceitar Orçamento';
+            }
+        };
+
+        function renderClientSuccessMessage(statusText) {
+            const isApproved = statusText === 'Aprovado';
+            const colorClass = isApproved ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200';
+            const icon = isApproved ? 'fa-check-circle text-emerald-600' : 'fa-times-circle text-rose-600';
+            const msg = isApproved ? 'Orçamento aceito com sucesso! O prestador já foi notificado e entrará em contato.' : 'Orçamento recusado. Agradecemos o seu retorno!';
+            
+            document.getElementById('client-action-area').innerHTML = `
+                <div class="text-center p-6 rounded-xl border ${colorClass} transition-all duration-500">
+                    <i class="fas ${icon} text-4xl mb-3"></i>
+                    <h3 class="text-lg font-bold">Resposta Registrada</h3>
+                    <p class="text-sm mt-1 font-medium">${msg}</p>
+                </div>
+            `;
+        }
+
+        // ==========================================
+        // ÁREA DO PROFISSIONAL (DASHBOARD)
+        // ==========================================
+        function listenToDatabase() {
+            const q = query(collection(db, "orcamentos"), orderBy("timestampCriacao", "desc"));
+            
+            // onSnapshot escuta o banco 24h por dia. Se o cliente clicar lá, altera aqui instantaneamente.
+            onSnapshot(q, (snapshot) => {
+                orcamentos = [];
+                snapshot.forEach((doc) => {
+                    orcamentos.push({ id: doc.id, ...doc.data() });
+                });
+                renderTable();
+            }, (error) => {
+                console.error("Erro no onSnapshot:", error);
+            });
+        }
+
+        document.getElementById('form-orcamento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if(!perfilEmpresa.nome || !perfilEmpresa.telefone) {
+                alert("Por favor, preencha o Perfil da Empresa (Nome e WhatsApp) antes de gerar propostas!");
+                switchTab('perfil');
                 return;
             }
 
-            const msg = statusText === 'Aprovado' 
-                ? `Olá! Analisei a proposta para *${currentClientBudget.servico}* e gostaria de confirmar o *ACEITE DIGITAL*.\n\n✍️ *Assinado por:* ${signature}\n💰 *Valor:* R$ ${formatCurrency(currentClientBudget.valor)}\n\nFico no aguardo dos próximos passos!`
-                : `Olá. Infelizmente não poderei seguir com a proposta para *${currentClientBudget.servico}* neste momento. Obrigado pela atenção.`;
+            const btnSubmit = document.getElementById('btn-submit-orcamento');
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando na nuvem...';
+            btnSubmit.disabled = true;
 
-            window.open(`https://wa.me/${currentClientBudget.emissorTel}?text=${encodeURIComponent(msg)}`, '_blank');
+            const emissao = new Date();
+            const validade = new Date(emissao);
+            validade.setDate(validade.getDate() + 5);
+
+            const novoOrcamento = {
+                cliente: document.getElementById('cliente').value,
+                servico: document.getElementById('servico').value,
+                material: document.getElementById('material').value,
+                data_inicio: document.getElementById('data_inicio').value,
+                data_fim: document.getElementById('data_fim').value,
+                valor: document.getElementById('valor').value,
+                pagamento: document.getElementById('pagamento').value,
+                obs: document.getElementById('obs').value,
+                status: 'Pendente',
+                data_emissao: emissao.toISOString().split('T')[0],
+                data_validade: validade.toISOString().split('T')[0],
+                timestampCriacao: Date.now(),
+                // Incorpora os dados atuais do perfil para congelar neste orçamento
+                emissorNome: perfilEmpresa.nome,
+                emissorCnpj: perfilEmpresa.cnpj,
+                emissorTel: perfilEmpresa.telefone,
+                emissorEmail: perfilEmpresa.email
+            };
+
+            try {
+                await addDoc(collection(db, "orcamentos"), novoOrcamento);
+                document.getElementById('form-orcamento').reset();
+            } catch(err) {
+                console.error("Erro ao salvar:", err);
+                alert("Falha ao salvar orçamento no banco de dados.");
+            } finally {
+                btnSubmit.innerHTML = 'Gerar Proposta';
+                btnSubmit.disabled = false;
+            }
+        });
+
+        function renderTable() {
+            const tabelaOrcamentos = document.getElementById('tabela-orcamentos');
+            tabelaOrcamentos.innerHTML = '';
+
+            if(orcamentos.length === 0) {
+                tabelaOrcamentos.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-medium">Nenhum orçamento registrado no banco de dados.</td></tr>`;
+                processMetrics();
+                return;
+            }
+
+            const hoje = new Date();
+
+            orcamentos.forEach((orc) => {
+                let badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
+                if(orc.status === 'Aprovado') badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                if(orc.status === 'Negado') badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
+
+                const dataEmissao = new Date(orc.data_emissao + 'T00:00:00');
+                const diffTime = Math.abs(hoje - dataEmissao);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                
+                let followUpAlertHtml = '';
+                let cardAlertStyle = '';
+                
+                // Piscar amarelo se passar de 2 dias pendente
+                if(orc.status === 'Pendente' && diffDays >= 2) {
+                    cardAlertStyle = 'border-l-4 border-l-amber-500 bg-amber-50/30';
+                    followUpAlertHtml = `<span class="block text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded mt-1 max-w-max pulse-alert"><i class="fas fa-clock mr-1"></i>Follow-up pendente</span>`;
+                }
+
+                const tr = document.createElement('tr');
+                tr.className = `border-b border-slate-100 hover:bg-slate-50/80 transition-colors highlight-update ${cardAlertStyle}`;
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-900">
+                        ${escapeHTML(orc.cliente)}
+                        ${followUpAlertHtml}
+                    </td>
+                    <td class="p-3 font-medium text-slate-600 max-w-[180px] truncate">${escapeHTML(orc.servico)}</td>
+                    <td class="p-3 font-semibold text-slate-900">R$ ${formatCurrency(orc.valor)}</td>
+                    <td class="p-3">
+                        <select onchange="updateStatus('${orc.id}', this.value)" class="text-xs font-semibold rounded-md border p-1.5 outline-none cursor-pointer ${badgeClass}">
+                            <option value="Pendente" ${orc.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Aprovado" ${orc.status === 'Aprovado' ? 'selected' : ''}>Aprovado</option>
+                            <option value="Negado" ${orc.status === 'Negado' ? 'selected' : ''}>Negado</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-center space-x-3">
+                        <button onclick="triggerWhatsAppLink('${orc.id}')" class="text-emerald-600 hover:text-emerald-700 hover:scale-110 font-medium transition-all" title="Copiar e Enviar Link via WhatsApp">
+                            <i class="fab fa-whatsapp text-lg"></i>
+                        </button>
+                        <button onclick="generatePDFReport('${orc.id}')" class="text-slate-400 hover:text-blue-600 hover:scale-110 font-medium transition-all" title="Baixar PDF Local">
+                            <i class="fas fa-file-pdf text-lg"></i>
+                        </button>
+                        <button onclick="deleteBudget('${orc.id}')" class="text-slate-300 hover:text-rose-600 hover:scale-110 transition-all" title="Excluir do Banco">
+                            <i class="fas fa-trash-alt text-lg"></i>
+                        </button>
+                    </td>
+                `;
+                tabelaOrcamentos.appendChild(tr);
+            });
+            processMetrics();
         }
 
-        function switchTab(tabId) {
+        window.updateStatus = async (idStr, newStatus) => {
+            try {
+                await updateDoc(doc(db, "orcamentos", idStr), { status: newStatus });
+                // A tabela se desenha sozinha via onSnapshot
+            } catch(err) {
+                console.error(err);
+                alert("Erro ao alterar o status.");
+            }
+        };
+
+        window.deleteBudget = async (idStr) => {
+            if(confirm('Tem certeza que deseja apagar esta proposta permanentemente?')) {
+                try {
+                    await deleteDoc(doc(db, "orcamentos", idStr));
+                    // A tabela se desenha sozinha via onSnapshot
+                } catch(err) {
+                    console.error(err);
+                    alert("Erro ao deletar.");
+                }
+            }
+        };
+
+        window.triggerWhatsAppLink = (idStr) => {
+            const o = orcamentos.find(item => item.id === idStr);
+            if(!o) return;
+
+            // Gera o link curto passando apenas o ID da nuvem
+            const clientLink = `${window.location.origin}${window.location.pathname}?view=client&id=${o.id}`;
+            const msg = `Olá *${o.cliente}*,\n\nCompilamos a sua proposta para *${o.servico}*.\n\nPara visualizar os detalhes e nos enviar a sua resposta digital, clique no link abaixo:\n\n🔗 ${clientLink}\n\nFico à disposição!`;
+            
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        };
+
+        // ==========================================
+        // FUNÇÕES COMPARTILHADAS (UI, PDF, KPI)
+        // ==========================================
+        window.switchTab = (tabId) => {
             document.getElementById('section-dashboard').classList.add('hidden');
             document.getElementById('section-perfil').classList.add('hidden');
             document.getElementById('tab-btn-dashboard').classList.remove('tab-active');
@@ -468,6 +693,20 @@
                 document.getElementById('tab-btn-perfil').classList.add('tab-active');
             }
         }
+
+        document.getElementById('form-perfil').addEventListener('submit', (e) => {
+            e.preventDefault();
+            perfilEmpresa.nome = document.getElementById('prof-nome').value;
+            perfilEmpresa.cnpj = document.getElementById('prof-cnpj').value;
+            perfilEmpresa.telefone = document.getElementById('prof-telefone').value;
+            perfilEmpresa.email = document.getElementById('prof-email').value;
+            perfilEmpresa.endereco = document.getElementById('prof-endereco').value;
+
+            localStorage.setItem('orcapro_profile_v3', JSON.stringify(perfilEmpresa));
+            applyProfileData();
+            alert('Perfil atualizado e pronto para os novos orçamentos!');
+            switchTab('dashboard');
+        });
 
         function applyProfileData() {
             document.getElementById('nav-company-name').innerText = perfilEmpresa.nome || "OrçaPro";
@@ -492,149 +731,13 @@
             document.getElementById('kpi-conversao').innerText = `${conversao}%`;
         }
 
-        function renderTable() {
-            tabelaOrcamentos.innerHTML = '';
-            if(orcamentos.length === 0) {
-                tabelaOrcamentos.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-medium">Nenhum orçamento registrado.</td></tr>`;
-                processMetrics();
-                return;
-            }
+        window.generatePDFReport = (idStr) => {
+            const o = orcamentos.find(item => item.id === idStr);
+            if(!o) return;
 
-            const hoje = new Date();
-
-            orcamentos.forEach((orc, index) => {
-                let badgeClass = 'bg-amber-50 text-amber-700 border-amber-200';
-                if(orc.status === 'Aprovado') badgeClass = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                if(orc.status === 'Negado') badgeClass = 'bg-rose-50 text-rose-700 border-rose-200';
-
-                const dataEmissao = new Date(orc.data_emissao + 'T00:00:00');
-                const diffTime = Math.abs(hoje - dataEmissao);
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                
-                let followUpAlertHtml = '';
-                let cardAlertStyle = '';
-                if(orc.status === 'Pendente' && diffDays >= 2) {
-                    cardAlertStyle = 'border-l-4 border-l-amber-500';
-                    followUpAlertHtml = `<span class="block text-[10px] bg-amber-500 text-white font-bold px-1.5 py-0.5 rounded mt-1 max-w-max"><i class="fas fa-clock mr-1"></i>Follow-up pendente</span>`;
-                }
-
-                const tr = document.createElement('tr');
-                tr.className = `border-b border-slate-100 hover:bg-slate-50/80 transition-colors ${cardAlertStyle}`;
-                tr.innerHTML = `
-                    <td class="p-3 font-semibold text-slate-900">
-                        ${escapeHTML(orc.cliente)}
-                        ${followUpAlertHtml}
-                    </td>
-                    <td class="p-3 font-medium text-slate-600 max-w-[180px] truncate">${escapeHTML(orc.servico)}</td>
-                    <td class="p-3 font-semibold text-slate-900">R$ ${formatCurrency(orc.valor)}</td>
-                    <td class="p-3">
-                        <select onchange="updateStatus(${index}, this.value)" class="text-xs font-semibold rounded-md border p-1.5 outline-none cursor-pointer ${badgeClass}">
-                            <option value="Pendente" ${orc.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                            <option value="Aprovado" ${orc.status === 'Aprovado' ? 'selected' : ''}>Aprovado</option>
-                            <option value="Negado" ${orc.status === 'Negado' ? 'selected' : ''}>Negado</option>
-                        </select>
-                    </td>
-                    <td class="p-3 text-center space-x-3">
-                        <button onclick="triggerWhatsAppLink(${index})" class="text-emerald-600 hover:text-emerald-700 hover:scale-110 font-medium transition-all" title="Link via WhatsApp">
-                            <i class="fab fa-whatsapp text-lg"></i>
-                        </button>
-                        <button onclick="generatePDFReport(${index})" class="text-slate-400 hover:text-blue-600 hover:scale-110 font-medium transition-all" title="Baixar PDF">
-                            <i class="fas fa-file-pdf text-lg"></i>
-                        </button>
-                        <button onclick="deleteBudget(${index})" class="text-slate-300 hover:text-rose-600 hover:scale-110 transition-all" title="Excluir">
-                            <i class="fas fa-trash-alt text-lg"></i>
-                        </button>
-                    </td>
-                `;
-                tabelaOrcamentos.appendChild(tr);
-            });
-            processMetrics();
-        }
-
-        formOrcamento.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const emissao = new Date();
-            const validade = new Date(emissao);
-            validade.setDate(validade.getDate() + 5);
-
-            const novoOrcamento = {
-                cliente: document.getElementById('cliente').value,
-                servico: document.getElementById('servico').value,
-                material: document.getElementById('material').value,
-                data_inicio: document.getElementById('data_inicio').value,
-                data_fim: document.getElementById('data_fim').value,
-                valor: document.getElementById('valor').value,
-                pagamento: document.getElementById('pagamento').value,
-                obs: document.getElementById('obs').value,
-                status: 'Pendente',
-                data_emissao: emissao.toISOString().split('T')[0],
-                data_validade: validade.toISOString().split('T')[0]
-            };
-
-            orcamentos.push(novoOrcamento);
-            localStorage.setItem('orcapro_data_v3', JSON.stringify(orcamentos));
-            formOrcamento.reset();
-            renderTable();
-        });
-
-        formPerfil.addEventListener('submit', (e) => {
-            e.preventDefault();
-            perfilEmpresa.nome = document.getElementById('prof-nome').value;
-            perfilEmpresa.cnpj = document.getElementById('prof-cnpj').value;
-            perfilEmpresa.telefone = document.getElementById('prof-telefone').value;
-            perfilEmpresa.email = document.getElementById('prof-email').value;
-            perfilEmpresa.endereco = document.getElementById('prof-endereco').value;
-
-            localStorage.setItem('orcapro_profile_v3', JSON.stringify(perfilEmpresa));
-            applyProfileData();
-            alert('Perfil atualizado!');
-            switchTab('dashboard');
-        });
-
-        window.updateStatus = (index, status) => {
-            orcamentos[index].status = status;
-            localStorage.setItem('orcapro_data_v3', JSON.stringify(orcamentos));
-            renderTable();
-        };
-
-        window.deleteBudget = (index) => {
-            if(confirm('Apagar esta proposta?')) {
-                orcamentos.splice(index, 1);
-                localStorage.setItem('orcapro_data_v3', JSON.stringify(orcamentos));
-                renderTable();
-            }
-        };
-
-        window.triggerWhatsAppLink = (index) => {
-            if(!perfilEmpresa.telefone) {
-                alert('Configure seu WhatsApp no "Perfil da Empresa" antes de enviar links.');
-                return;
-            }
-
-            const o = orcamentos[index];
-            
-            const payload = {
-                ...o,
-                emissorNome: perfilEmpresa.nome,
-                emissorCnpj: perfilEmpresa.cnpj,
-                emissorTel: perfilEmpresa.telefone,
-                emissorEmail: perfilEmpresa.email
-            };
-
-            const base64Data = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-            const clientLink = `${window.location.origin}${window.location.pathname}?view=client&d=${base64Data}`;
-
-            const msg = `Olá *${o.cliente}*,\n\nCompilamos a sua proposta para *${o.servico}*.\n\nPara visualizar valores e realizar o *Aceite Digital*, clique no link abaixo:\n\n🔗 ${clientLink}\n\nFico à disposição!`;
-            
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-        };
-
-        window.generatePDFReport = (index) => {
-            const o = orcamentos[index];
-            document.getElementById('pdf-emissor-nome').innerText = perfilEmpresa.nome || "Prestador";
-            document.getElementById('pdf-emissor-cnpj').innerText = perfilEmpresa.cnpj ? `CNPJ/CPF: ${perfilEmpresa.cnpj}` : "";
-            document.getElementById('pdf-emissor-contatos').innerText = `Tel: ${perfilEmpresa.telefone || ''} | E-mail: ${perfilEmpresa.email || ''}`;
-            document.getElementById('pdf-assinatura-prestador').innerText = perfilEmpresa.nome || "Prestador";
+            document.getElementById('pdf-emissor-nome').innerText = o.emissorNome || "Prestador";
+            document.getElementById('pdf-emissor-cnpj').innerText = o.emissorCnpj ? `CNPJ/CPF: ${o.emissorCnpj}` : "";
+            document.getElementById('pdf-emissor-contatos').innerText = `Tel: ${o.emissorTel || ''} | E-mail: ${o.emissorEmail || ''}`;
 
             document.getElementById('pdf-cliente-nome').innerText = o.cliente;
             document.getElementById('pdf-data-emissao').innerText = formatDate(o.data_emissao);
