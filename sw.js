@@ -1,36 +1,24 @@
-const CACHE_NAME = 'orcamento-facil-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'orcapro-v1';
+// Substitua 'index.html' pelo nome exato do seu arquivo HTML principal, se for diferente.
+const urlsToCache = [
   './',
-  './index.html',
-  './manifest.json'
+  './index.html' 
 ];
 
-// Instalação: Cache dos arquivos base
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-// Interceptação de Rede (Network First, fallback to cache)
-self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-
+self.addEventListener('fetch', event => {
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Atualiza o cache com a resposta de rede mais recente
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, clone);
-        });
-        return response;
-      })
-      .catch(() => {
-        // Se a rede falhar, busca no cache
-        return caches.match(event.request);
+    caches.match(event.request)
+      .then(response => {
+        return response || fetch(event.request);
       })
   );
 });
